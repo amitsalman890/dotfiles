@@ -4,9 +4,8 @@
   editor       = vim
 
 [user]
-  name       = Moshe Avni
-  email      = mavni@netapp.com
-
+	name = Amit-proj
+	email = Amitsalman80@gmail.com
 [checkout]
   defaultRemote = origin
 
@@ -100,3 +99,4 @@
   showbranch  = true
   status      = true
   ui          = true
+
