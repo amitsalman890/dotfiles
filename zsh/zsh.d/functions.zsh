@@ -35,7 +35,6 @@ function _alias_finder() {
   for s in $(echo $1); do
     alias_val=$(_alias_parser "$s")
     if [[ -n $alias_val ]]; then
-      # Handle nested aliases with the same name
       if [[ $alias_val == *"$s"* ]]; then
         final_result+=($alias_val)
       else
@@ -50,8 +49,6 @@ function _alias_finder() {
 
 ### Random functions ###
 function mwatch() {
-  # log_file=/tmp/moshe_mwatch.log
-  # [[ -f $log_file ]] && cat /dev/null > $log_file || touch $log_file
   final_alias=$(_alias_finder "$*")
   echo $final_alias
   watch "$final_alias"

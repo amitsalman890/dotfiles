@@ -1,4 +1,4 @@
-# Moshe Avni's DotFiles
+# Amit Salman's DotFiles
 
 (also, how to bootstrap a brand new Mac laptop)
 
@@ -23,7 +23,7 @@
 
    ```bash
    [[ -d ~/Repos ]] || mkdir ~/Repos
-   cd ~ && git clone git@github.com:mosheavni/dotfiles.git .dotfiles && cd .dotfiles
+   cd ~ && git clone git@github.com:Amit-proj/dotfiles.git .dotfiles && cd .dotfiles
    ```
 
 3. Install brew dependencies (generated with `brew bundle dump`)
