@@ -4,6 +4,7 @@ local mappings = require 'kubectl.mappings'
 
 local cluster_to_profile = {
   ['spot-prod'] = 'production-sso',
+  ['spot-prod-killer'] = 'production-sso',
 }
 
 local profile_to_onelogin = {
