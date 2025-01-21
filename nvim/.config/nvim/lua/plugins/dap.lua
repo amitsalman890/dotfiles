@@ -184,6 +184,8 @@ M.config = function()
     dap.continue()
   end, opts)
 
+  vim.keymap.set('n', '<leader>vt', require('nvim-dap-virtual-text').toggle, opts)
+
   -- Step Over
   vim.keymap.set('n', '<leader>do', function()
     dap.step_over()
