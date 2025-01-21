@@ -72,11 +72,11 @@ config.native_macos_fullscreen_mode = true
 config.background = {
   {
     source = {
-      File = HOME .. '/Pictures/wallpaperflare1.jpg',
+      File = HOME .. '/Pictures/wp4.jpg',
     },
     repeat_y = 'NoRepeat',
     hsb = {
-      brightness = 0.17,
+      brightness = 0.15,
       hue = 1.0,
       saturation = 1.0,
     },
