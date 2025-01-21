@@ -1,0 +1,20 @@
+{
+  "name": "my-snippets",
+  "contributes": {
+    "snippets": [
+      {
+        "language": [
+          "lua"
+        ],
+        "path": "./lua.json"
+      },
+      {
+        "language": [
+          "groovy",
+          "Jenkinsfile"
+        ],
+        "path": "./groovy.json"
+      }
+    ]
+  }
+}

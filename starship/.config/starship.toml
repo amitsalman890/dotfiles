@@ -1,0 +1,19 @@
+format = "$directory$all"
+
+[kubernetes]
+disabled = false
+format = '\([⎈](bold fg:33)[$cluster](fg:166):[$namespace](dimmed green)\) '
+
+[aws]
+disabled = false
+force_display = true
+style = 'yellow'
+
+[python]
+disabled = true
+
+[battery]
+disabled = false
+
+[lua]
+disabled = true
