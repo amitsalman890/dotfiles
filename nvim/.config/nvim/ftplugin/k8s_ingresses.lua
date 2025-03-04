@@ -3,13 +3,12 @@ local ingress_view = require 'kubectl.views.ingresses'
 local mappings = require 'kubectl.mappings'
 
 local cluster_to_profile = {
-  ['spot-prod'] = 'default',
-  ['spot-dev-us-east-2'] = 'dev',
+  ['spot-prod'] = 'production-sso',
+  ['spot-prod-killer'] = 'production-sso',
 }
 
 local profile_to_onelogin = {
-  default = 'https://spotinst.onelogin.com/client/apps/select/889121819',
-  dev = 'https://spotinst.onelogin.com/client/apps/select/889121822',
+  ['production-sso'] = 'https://spotinst.onelogin.com/client/apps/select/885672524',
 }
 
 vim.schedule(function()
@@ -73,7 +72,7 @@ vim.schedule(function()
                 vim.ui.open(profile_to_onelogin[aws_profile])
                 vim.defer_fn(function()
                   vim.ui.open(lb_url)
-                end, 3000)
+                end, 5000)
               end)
             end)
           end)
