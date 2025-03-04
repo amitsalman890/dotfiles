@@ -81,3 +81,5 @@ export KUBECTL_EXTERNAL_DIFF="kdiff"
 export KUBERNETES_EXEC_INFO='{"apiVersion": "client.authentication.k8s.io/v1beta1"}'
 
 eval "$(starship init zsh)"
+
+
