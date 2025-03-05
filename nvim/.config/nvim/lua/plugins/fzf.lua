@@ -9,6 +9,14 @@ return {
     { '<leader>hh', ':FzfLua help_tags<cr>', silent = true },
     { '<leader>i', ':FzfLua oldfiles<cr>', silent = true },
     {
+      '<C-x><C-f>',
+      require('fzf-lua').complete_path,
+      mode = 'i',
+      silent = true,
+      desc = 'Fuzzy complete path',
+    },
+
+    {
       '<leader>ccp',
       function()
         local actions = require 'CopilotChat.actions'
@@ -35,7 +43,7 @@ return {
             -- perform checkout instead of switch
             ['ctrl-s'] = {
               fn = function(selected)
-                local branch = selected[1]
+                local branch = vim.trim(selected[1])
                 require('user.git').checkout(branch)
               end,
               reload = false,
@@ -43,7 +51,7 @@ return {
             },
             ['ctrl-y'] = {
               fn = function(selected)
-                local branch = selected[1]
+                local branch = vim.trim(selected[1])
                 vim.fn.setreg('+', branch)
                 utils.info('Yanked branch name ' .. branch)
               end,
@@ -53,9 +61,9 @@ return {
             ['ctrl-r'] = {
               fn = function(selected)
                 require('fzf-lua.utils').fzf_exit()
-                local branch = selected[1]
+                local branch = vim.trim(selected[1])
                 vim.defer_fn(function()
-                  vim.ui.input({ prompt = 'Rename branch: ', default = selected[1] }, function(new_name)
+                  vim.ui.input({ prompt = 'Rename branch: ', default = branch }, function(new_name)
                     if not new_name or new_name == '' then
                       utils.warn 'Action aborted'
                       return
@@ -78,7 +86,7 @@ return {
             },
             ['ctrl-x'] = {
               fn = function(selected)
-                local branch = selected[1]
+                local branch = vim.trim(selected[1])
                 vim.ui.select({ 'Yes', 'No' }, { prompt = 'Are you sure you want to delete the branch ' .. branch .. '?' }, function(yes_or_no)
                   if yes_or_no == 'No' then
                     utils.warn 'Action aborted'
@@ -122,23 +130,23 @@ return {
     },
     {
       '<leader>/',
-      function()
-        require('fzf-lua').live_grep {
-          multiprocess = true,
-          rg_opts = [=[--column --line-number --hidden --no-heading --color=always --smart-case --max-columns=4096 -g '!.git' -e]=],
-        }
-      end,
+      require('fzf-lua').live_grep,
     },
   },
   cmd = { 'FzfLua', 'ListFilesFromBranch' },
   config = function()
     require('fzf-lua').setup {
       'default-title',
+      files = {
+        git_icons = true,
+      },
       oldfiles = {
         cwd_only = true,
         include_current_session = true,
       },
       grep = {
+        multiprocess = true,
+        RIPGREP_CONFIG_PATH = vim.env.HOME .. '/.ripgreprc',
         -- One thing I missed from Telescope was the ability to live_grep and the
         -- run a filter on the filenames.
         -- Ex: Find all occurrences of "enable" but only in the "plugins" directory.
@@ -148,6 +156,7 @@ return {
         rg_glob = true, -- enable glob parsing
         glob_flag = '--iglob', -- case insensitive globs
         glob_separator = '%s%-%-', -- query separator pattern (lua): ' --'
+        hidden = true,
       },
       keymap = { fzf = { ['ctrl-q'] = 'select-all+accept' } },
     }

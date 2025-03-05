@@ -5,7 +5,8 @@ vim.g.python3_host_prog = 'python3'
 -- vim.g.do_filetype_lua = 1
 -- vim.g.did_load_filetypes = 0
 
-vim.o.titlestring = "nvim: %{substitute(getcwd(), $HOME . '/Repos/', '', '')}"
+vim.o.titlestring = "nvim: %{substitute('~' . substitute(getcwd(), $HOME, '', ''), '\\~/Repos/', '', '')}"
+vim.o.title = true -- Changes the wezterm title
 vim.o.cursorcolumn = true
 vim.o.cursorline = true -- Add highlight behind current line
 vim.opt.shortmess:append { c = true, l = false, q = false, S = false, C = true, I = true }
@@ -70,10 +71,8 @@ vim.o.wildmenu = true -- Displays a menu on autocomplete
 vim.opt.wildmode = { 'longest:full', 'full' } -- Command-line completion mode
 vim.opt.completeopt = 'menu,menuone,noselect,noinsert,popup'
 vim.o.previewheight = 15
-vim.o.title = true -- Changes the iterm title
 vim.o.laststatus = 3 -- Global statusline, only one for all buffers
 vim.o.showcmd = true
-vim.o.guifont = 'Fira Code,Hack Nerd Font'
 vim.o.mouse = 'a'
 vim.o.undofile = true -- Enables saving undo history to a file
 vim.o.undolevels = 10000
@@ -153,7 +152,7 @@ vim.filetype.add {
     ['.*/templates/.*%.yaml'] = {
       function()
         if vim.fn.search('{{.+}}', 'nw') then
-          return 'gotmpl'
+          return 'helm'
         end
       end,
       { priority = 200 },
