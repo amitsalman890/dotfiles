@@ -84,6 +84,15 @@ local M = {
   {
     'nvim-tree/nvim-web-devicons',
     lazy = true,
+    opts = {
+      override_by_extension = {
+        hcl = {
+          icon = '',
+          color = '#7182D0',
+          name = 'HCL',
+        },
+      },
+    },
   },
   {
     'eero-lehtinen/oklch-color-picker.nvim',
@@ -109,7 +118,6 @@ local M = {
   },
   {
     'luukvbaal/statuscol.nvim',
-    branch = '0.10',
     event = { 'BufReadPre', 'BufNewFile' },
     config = function()
       local builtin = require 'statuscol.builtin'

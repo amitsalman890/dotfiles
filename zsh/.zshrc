@@ -18,6 +18,7 @@ typeset -gU path fpath
 
 # Additional PATHs
 path=(
+  ${ASDF_DATA_DIR:-$HOME/.asdf}/shims
   /opt/homebrew/bin
   /opt/homebrew/sbin
   /opt/homebrew/opt/make/libexec/gnubin
@@ -45,8 +46,6 @@ export LC_ALL=en_US.UTF-8
 # ============= #
 # asdf
 export ASDF_PYTHON_DEFAULT_PACKAGES_FILE=~/.dotfiles/requirements.txt
-export ASDF_DIR="$HOME/.asdf"
-[[ -d $HOME/.asdf ]] && source $HOME/.asdf/asdf.sh
 
 source $HOME/.antidote/antidote.zsh
 antidote load
