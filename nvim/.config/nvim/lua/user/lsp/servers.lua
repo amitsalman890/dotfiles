@@ -72,6 +72,27 @@ M.setup = function()
     capabilities = capabilities,
   }
 
+  lspconfig['harper_ls'].setup {
+    enabled = true,
+    filetypes = { "markdown" },
+    settings = {
+      ["harper-ls"] = {
+        userDictPath = "~/github/dotfiles-latest/neovim/neobean/spell/en.utf-8.add",
+        linters = {
+          ToDoHyphen = false,
+          -- SentenceCapitalization = true,
+          -- SpellCheck = true,
+        },
+        isolateEnglish = true,
+        markdown = {
+          -- [ignores this part]()
+          -- [[ also ignores my marksman links ]]
+          IgnoreLinkTitle = true,
+        },
+      },
+    },
+  }
+
   local yaml_cfg = require('user.lsp.yaml').setup { capabilities = capabilities }
 
   lspconfig['helm_ls'].setup {
