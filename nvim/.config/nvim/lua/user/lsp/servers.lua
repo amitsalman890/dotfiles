@@ -1,20 +1,30 @@
 local M = {}
 M.setup = function()
   local capabilities = require('user.lsp.config').capabilities
-  local lspconfig = require 'lspconfig'
 
-  lspconfig['bashls'].setup { capabilities = capabilities }
-  lspconfig['cssls'].setup { capabilities = capabilities }
-  lspconfig['cssmodules_ls'].setup { capabilities = capabilities }
-  lspconfig['dockerls'].setup { capabilities = capabilities }
-  lspconfig['vtsls'].setup { capabilities = capabilities }
-  lspconfig['docker_compose_language_service'].setup { capabilities = capabilities }
-  lspconfig['groovyls'].setup { capabilities = capabilities }
-  lspconfig['html'].setup { capabilities = capabilities }
-  lspconfig['vimls'].setup { capabilities = capabilities }
-  lspconfig['taplo'].setup { capabilities = capabilities }
-  lspconfig['jsonls'].setup {
-    capabilities = capabilities,
+  vim.lsp.config('*', { capabilities = capabilities })
+  vim.lsp.enable {
+    'bashls',
+    'cssls',
+    'cssmodules_ls',
+    'docker_compose_language_service',
+    'dockerls',
+    'gopls',
+    'groovyls',
+    'helm_ls',
+    'html',
+    'jinja_lsp',
+    'jsonls',
+    'lua_ls',
+    'pyright',
+    'taplo',
+    'terraformls',
+    'vimls',
+    'vtsls',
+    'yamlls',
+  }
+
+  vim.lsp.config('jsonls', {
     settings = {
       json = {
         trace = {
@@ -24,19 +34,17 @@ M.setup = function()
         validate = { enable = true },
       },
     },
-  }
+  })
 
-  lspconfig['pyright'].setup {
-    capabilities = capabilities,
+  vim.lsp.config('pyright', {
     settings = {
       organizeimports = {
         provider = 'isort',
       },
     },
-  }
+  })
 
-  lspconfig['lua_ls'].setup {
-    capabilities = capabilities,
+  vim.lsp.config('lua_ls', {
     settings = {
       Lua = {
         runtime = {
@@ -53,57 +61,55 @@ M.setup = function()
           disable = { 'undefined-global' },
           globals = { 'vim' },
         },
-        -- workspace = {
-        --   -- Make the server aware of Neovim runtime files
-        --   library = {},
-        --   checkThirdParty = false,
-        -- },
-        -- telemetry = { enable = false },
       },
     },
-  }
+  })
 
-  lspconfig['terraformls'].setup {
+  vim.lsp.config('terraformls', {
     on_attach = function(c)
       require('treesitter-terraform-doc').setup {}
       c.server_capabilities.semanticTokensProvider = {}
       vim.o.commentstring = '# %s'
     end,
-    capabilities = capabilities,
-  }
+  })
 
-  lspconfig['harper_ls'].setup {
-    enabled = true,
-    filetypes = { "markdown" },
-    settings = {
-      ["harper-ls"] = {
-        userDictPath = "~/github/dotfiles-latest/neovim/neobean/spell/en.utf-8.add",
-        linters = {
-          ToDoHyphen = false,
-          -- SentenceCapitalization = true,
-          -- SpellCheck = true,
-        },
-        isolateEnglish = true,
-        markdown = {
-          -- [ignores this part]()
-          -- [[ also ignores my marksman links ]]
-          IgnoreLinkTitle = true,
-        },
-      },
-    },
-  }
+  -- local yaml_cfg = {
+  --   yaml = {
+  --     format = {
+  --       bracketSpacing = false,
+  --     },
+  --     -- schemas = require('schemastore').yaml.schemas(),
+  --     -- schemas = vim.tbl_deep_extend('force', { [require('kubernetes').yamlls_schema()] = '*.yaml' }, require('schemastore').yaml.schemas()),
+  --     schemaStore = {
+  --       -- Must disable built-in schemaStore support to use
+  --       -- schemas from SchemaStore.nvim plugin
+  --       enable = false,
+  --       -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+  --       url = '',
+  --     },
+  --     schemas = {},
+  --   },
+  -- }
+  -- vim.lsp.config('yamlls', {
+  --   capabilities = vim.tbl_deep_extend('force', capabilities, {
+  --     textDocument = {
+  --       foldingRange = {
+  --         dynamicRegistration = true,
+  --       },
+  --     },
+  --   }),
+  -- })
 
   local yaml_cfg = require('user.lsp.yaml').setup { capabilities = capabilities }
 
-  lspconfig['helm_ls'].setup {
-    capabilities = capabilities,
+  vim.lsp.config('helm_ls', {
     filetypes = { 'helm', 'gotmpl' },
     settings = {
       yamlls = {
         config = yaml_cfg.settings,
       },
     },
-  }
+  })
 end
 
 return M

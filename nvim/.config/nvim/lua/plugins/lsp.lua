@@ -29,7 +29,6 @@ M.dependencies = {
     keys = { { '<leader>cm', '<cmd>Mason<cr>', desc = 'Mason' } },
     build = ':MasonUpdate',
     opts = {
-      "harper-ls",
       ui = {
         border = 'rounded',
       },
@@ -61,7 +60,7 @@ M.dependencies = {
 }
 
 local language_specific_plugins = {
-  { 'cuducos/yaml.nvim',    ft = 'yaml' },
+  { 'cuducos/yaml.nvim', ft = 'yaml' },
   {
     'phelipetls/jsonpath.nvim',
     ft = 'json',
@@ -84,8 +83,7 @@ local language_specific_plugins = {
     'mosheavni/yaml-companion.nvim',
     ft = 'yaml',
     config = function()
-      vim.keymap.set('n', '<leader>cc', ":lua require('yaml-companion').open_ui_select()<cr>",
-        { remap = false, silent = true })
+      vim.keymap.set('n', '<leader>cc', ":lua require('yaml-companion').open_ui_select()<cr>", { remap = false, silent = true })
       require('user.menu').add_actions('YAML', {
         ['Change Schema'] = function()
           require('yaml-companion').open_ui_select()
@@ -105,10 +103,15 @@ local language_specific_plugins = {
         -- See the configuration section for more details
         -- Load luvit types when the `vim.uv` word is found
         { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
-        { path = 'snacks.nvim',        words = { 'Snacks' } },
-        { path = 'wezterm-types',      mods = { 'wezterm' } },
+        { path = 'snacks.nvim', words = { 'Snacks' } },
+        { path = 'wezterm-types', mods = { 'wezterm' } },
       },
     },
+  },
+  {
+    'crispgm/nvim-go',
+    ft = 'go',
+    opts = {},
   },
 }
 
