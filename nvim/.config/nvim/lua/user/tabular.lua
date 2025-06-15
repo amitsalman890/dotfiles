@@ -7,54 +7,101 @@ local M = {
   current_filter = nil,
   sort_column = nil,
   sort_direction = 1, -- 1 for ascending, -1 for descending
+  spacing = 4, -- Number of spaces between columns
   col_widths = {}, -- Add this line to store column widths
   ns_headers = vim.api.nvim_create_namespace 'tabular_headers',
   ns_sort = vim.api.nvim_create_namespace 'tabular_sort',
+  ns_filter = vim.api.nvim_create_namespace 'tabular_filter',
 }
 
+function M.raw_parse()
+  -- For two spaces, we need a special pattern
+  if M.delimiter == '  ' then
+    M.pattern_delimiter = '  +'
+  else
+    -- Escape special pattern characters in delimiter
+    M.pattern_delimiter = M.delimiter:gsub('[%(%)%.%%%+%-%*%?%[%]%^%$]', '%%%1')
+  end
+
+  -- Parse headers
+  M.headers = {}
+  local header_line = M.raw_lines[1]
+  local header_words = vim.split(header_line, M.pattern_delimiter)
+  for _, word in ipairs(header_words) do
+    table.insert(M.headers, vim.trim(word))
+  end
+
+  -- Parse data lines
+  M.lines = {}
+  for i = 2, #M.raw_lines do
+    local line = M.raw_lines[i]
+    local row = {}
+    local words = vim.split(line, M.pattern_delimiter)
+    for _, word in ipairs(words) do
+      table.insert(row, vim.trim(word))
+    end
+    table.insert(M.lines, row)
+  end
+end
+
+function M.ec2_instance_selector_parse(raw_lines)
+  local first_line = raw_lines[1] or ''
+  local second_line = raw_lines[2] or ''
+  local header_dashes = vim.split(second_line, '%s+', { trimempty = true })
+  local header_spaces = vim.split(second_line, '-+', { trimempty = true })
+  local dashes_lengths = vim.tbl_map(function(str)
+    return #str
+  end, header_dashes)
+  local spaces_lengths = vim.tbl_map(function(str)
+    return #str
+  end, header_spaces)
+
+  M.headers = {}
+  local start_pos = 1
+  for i, length in ipairs(dashes_lengths) do
+    local header = first_line:sub(start_pos, start_pos + length - 1)
+    table.insert(M.headers, vim.trim(header))
+    start_pos = start_pos + length + spaces_lengths[i]
+  end
+
+  -- Parse data lines
+  M.lines = {}
+  for i = 3, #M.raw_lines do
+    local data_start_pos = 1
+    local line = M.raw_lines[i]
+    local row = {}
+    table.insert(M.lines, row)
+    for j, length in ipairs(dashes_lengths) do
+      local word = line:sub(data_start_pos, data_start_pos + length - 1)
+      table.insert(row, vim.trim(word))
+      data_start_pos = data_start_pos + length + spaces_lengths[j]
+    end
+    table.insert(M.lines, row)
+  end
+end
+
 function M.parse_buffer()
-  vim.ui.input({
-    prompt = 'Enter delimiter: ',
-    default = M.delimiter,
-  }, function(input)
-    if not input then
-      return
-    end
-
-    M.delimiter = input
-    -- For two spaces, we need a special pattern
-    if M.delimiter == '  ' then
-      M.pattern_delimiter = '  +'
-    else
-      -- Escape special pattern characters in delimiter
-      M.pattern_delimiter = M.delimiter:gsub('[%(%)%.%%%+%-%*%?%[%]%^%$]', '%%%1')
-    end
-
-    local bufnr = vim.api.nvim_get_current_buf()
-    M.raw_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-
-    -- Parse headers
-    M.headers = {}
-    local header_line = M.raw_lines[1]
-    local header_words = vim.split(header_line, M.pattern_delimiter)
-    for _, word in ipairs(header_words) do
-      table.insert(M.headers, vim.trim(word))
-    end
-
-    -- Parse data lines
-    M.lines = {}
-    for i = 2, #M.raw_lines do
-      local line = M.raw_lines[i]
-      local row = {}
-      local words = vim.split(line, M.pattern_delimiter)
-      for _, word in ipairs(words) do
-        table.insert(row, vim.trim(word))
-      end
-      table.insert(M.lines, row)
-    end
-
+  local bufnr = vim.api.nvim_get_current_buf()
+  M.raw_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local second_line = M.raw_lines[2] or ''
+  -- Check if the second line contains dashes seperated by spaces
+  if second_line:match '[-=]+%s' then
+    M.ec2_instance_selector_parse(M.raw_lines)
     M.display_table()
-  end)
+  else
+    vim.ui.input({
+      prompt = 'Enter delimiter: ',
+      default = M.delimiter,
+    }, function(input)
+      if not input then
+        return
+      end
+
+      M.delimiter = input
+      M.raw_parse()
+      M.display_table()
+    end)
+  end
 end
 
 function M.sort_by_column(col_index)
@@ -73,6 +120,14 @@ function M.sort_by_column(col_index)
     local val_a = a[col_index] or ''
     local val_b = b[col_index] or ''
 
+    -- check if there are two numbers separated by a comma, if so, remove it
+    if val_a:find ',' then
+      val_a = val_a:gsub('(%d+),(%d+)', '%1%2')
+    end
+    if val_b:find ',' then
+      val_b = val_b:gsub('(%d+),(%d+)', '%1%2')
+    end
+
     -- Try to convert to numbers if possible
     local num_a = tonumber(val_a)
     local num_b = tonumber(val_b)
@@ -83,6 +138,19 @@ function M.sort_by_column(col_index)
         return num_a < num_b
       else
         return num_a > num_b
+      end
+    end
+
+    -- check if there is a number in the string
+    local str_num_a = val_a:match '(%d+)' or false
+    local str_num_b = val_b:match '(%d+)' or false
+    if str_num_a and str_num_b then
+      str_num_a = tonumber(str_num_a)
+      str_num_b = tonumber(str_num_b)
+      if M.sort_direction == 1 then
+        return str_num_a < str_num_b
+      else
+        return str_num_a > str_num_b
       end
     end
 
@@ -143,20 +211,20 @@ function M.display_table()
     local padded_header = header .. string.rep(' ', M.col_widths[i] - #header)
     table.insert(formatted_headers, padded_header)
   end
-  local header_line = table.concat(formatted_headers, '    ')
+  local header_line = table.concat(formatted_headers, string.rep(' ', M.spacing))
 
   -- Create separator line with proper spacing
   local separator_parts = {}
   for _, width in ipairs(M.col_widths) do
     table.insert(separator_parts, string.rep('-', width))
   end
-  local separator_line = table.concat(separator_parts, '----')
+  local separator_line = table.concat(separator_parts, string.rep('-', M.spacing))
   local display_lines = { header_line, separator_line }
 
   -- Format and insert data lines
   for _, row in ipairs(M.lines) do
     local should_display = true
-    if M.current_filter then
+    if M.current_filter and M.current_filter ~= '' then
       should_display = false
       for _, cell in ipairs(row) do
         if string.find(string.lower(cell), M.current_filter) then
@@ -173,11 +241,23 @@ function M.display_table()
         local padded_cell = value .. string.rep(' ', M.col_widths[i] - #value)
         table.insert(formatted_row, padded_cell)
       end
-      table.insert(display_lines, table.concat(formatted_row, '    '))
+      table.insert(display_lines, table.concat(formatted_row, string.rep(' ', M.spacing)))
     end
   end
 
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, display_lines)
+
+  -- Clear any existing filter indicators
+  vim.api.nvim_buf_clear_namespace(bufnr, M.ns_filter, 0, -1)
+
+  -- Add filter indicator if there's an active filter
+  if M.current_filter and M.current_filter ~= '' then
+    vim.api.nvim_buf_set_extmark(bufnr, M.ns_filter, 1, 0, {
+      virt_text = { { '🔍 Filter: ' .. M.current_filter .. ' ', 'Comment' } },
+      virt_text_pos = 'overlay',
+    })
+  end
+
   -- Add header highlighting and sort indicator
   local pos = 0
   for i, width in ipairs(M.col_widths) do
@@ -198,7 +278,7 @@ function M.display_table()
       })
     end
 
-    pos = pos + width + 4 -- Change from +2 to +4 for the four-space separator
+    pos = pos + width + M.spacing
   end
 
   -- Set buffer options
@@ -233,7 +313,7 @@ function M.sort_by_current_column()
   for i, width in ipairs(M.col_widths) do
     local next_pos = current_pos + width
     if i < #M.col_widths then
-      next_pos = next_pos + 2 -- Add space for the two-space separator
+      next_pos = next_pos + M.spacing
     end
 
     if col >= current_pos and col < next_pos then
