@@ -35,6 +35,7 @@ function _alias_finder() {
   for s in $(echo $1); do
     alias_val=$(_alias_parser "$s")
     if [[ -n $alias_val ]]; then
+      # Handle nested aliases with the same name
       if [[ $alias_val == *"$s"* ]]; then
         final_result+=($alias_val)
       else
@@ -49,6 +50,8 @@ function _alias_finder() {
 
 ### Random functions ###
 function mwatch() {
+  # log_file=/tmp/moshe_mwatch.log
+  # [[ -f $log_file ]] && cat /dev/null > $log_file || touch $log_file
   final_alias=$(_alias_finder "$*")
   echo $final_alias
   watch "$final_alias"
@@ -322,14 +325,6 @@ function asdf-kubectl-version() {
   asdf global kubectl "${TO_INSTALL}"
 }
 
-# fzf
-function fdf() {
-  # remove trailing / from $1
-  dir_clean=${1%/}
-  all_files=$(find $dir_clean/* -maxdepth 0 -type d -print 2>/dev/null)
-  dir_to_enter=$(sed "s?$dir_clean/??g" <<<$all_files | fzf)
-  cd "$dir_clean/$dir_to_enter" && nvim
-}
 
 function mkdp() {
   kubectl get pod --no-headers | fzf | awk '{print $1}' | xargs -n 1 kubectl describe pod

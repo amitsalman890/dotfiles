@@ -1,31 +1,43 @@
 return {
   'Ramilito/kubectl.nvim',
+  dir = '~/Repos/kubectl.nvim',
   opts = {
-    log_level = vim.log.levels.DEBUG,
-    diff = { bin = 'kdiff' },
-    headers = true,
-    hints = true,
-    context = true,
-    heartbeat = true,
-    kubernetes_versions = true,
     auto_refresh = {
       enabled = true,
+      interval = 500, -- milliseconds
     },
-    filter = {
-      apply_on_select_from_history = false,
-      max_history = 100,
+
+    headers = {
+      enabled = true,
+      hints = true,
+      context = true,
+      heartbeat = true,
     },
-    logs = {
-      since = '30s',
-      timestamps = false,
-      prefix = false,
-    },
-    lineage = {
-      enabled = false,
-    },
-    completion = {
-      follow_cursor = false,
-    },
+    -- log_level = vim.log.levels.DEBUG,
+    -- diff = { bin = 'kdiff' },
+    -- headers = true,
+    -- hints = true,
+    -- context = true,
+    -- heartbeat = true,
+    -- kubernetes_versions = true,
+    -- auto_refresh = {
+    --   enabled = true,
+    -- },
+    -- filter = {
+    --   apply_on_select_from_history = false,
+    --   max_history = 100,
+    -- },
+    -- logs = {
+    --   since = '30s',
+    --   timestamps = false,
+    --   prefix = false,
+    -- },
+    -- lineage = {
+    --   enabled = false,
+    -- },
+    -- completion = {
+    --   follow_cursor = false,
+    -- },
   },
   cmd = { 'Kubectl', 'Kubectx', 'Kubens' },
   keys = {
@@ -57,6 +69,9 @@ return {
       pattern = 'k8s_*',
       callback = function()
         vim.opt.titlestring = 'k8s: %t'
+        if vim.bo.filetype == 'k8s_yaml' then
+          vim.bo.filetype = 'yaml'
+        end
       end,
     })
   end,

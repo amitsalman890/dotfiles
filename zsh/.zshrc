@@ -53,8 +53,9 @@ antidote load
 # ================ #
 #  PS1 and Random  #
 # ================ #
-export EDITOR="nvim"
+export EDITOR='nvim'
 export AWS_PAGER=""
+export MANPAGER='nvim +Man!'
 export cdpath=(. ~ ~/Repos)
 
 # zsh gh copilot configuration
@@ -80,5 +81,3 @@ export KUBECTL_EXTERNAL_DIFF="kdiff"
 export KUBERNETES_EXEC_INFO='{"apiVersion": "client.authentication.k8s.io/v1beta1"}'
 
 eval "$(starship init zsh)"
-
-
