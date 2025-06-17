@@ -17,7 +17,8 @@ alias ll='ls -lah'
 alias ls='eza '
 alias dc='cd '
 alias dotfiles='cd ~/.dotfiles'
-alias pj='fdf ~/Repos'
+alias pj='fdf ~/Repos/ ~/.dotfiles'
+alias lazy='fdf ~/.local/share/nvim/lazy/'
 alias repos="~/Repos"
 
 #------------------------------------------------------------------------------

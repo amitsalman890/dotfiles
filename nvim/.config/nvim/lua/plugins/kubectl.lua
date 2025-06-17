@@ -1,6 +1,5 @@
 return {
   'Ramilito/kubectl.nvim',
-  dir = '~/Repos/kubectl.nvim',
   opts = {
     auto_refresh = {
       enabled = true,
