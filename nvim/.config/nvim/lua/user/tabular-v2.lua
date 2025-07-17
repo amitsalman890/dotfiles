@@ -43,6 +43,30 @@ M.default_tab_state = {
   timer = nil, -- Timer for periodic updates
 }
 
+--- Gets or creates a tab state for a given command
+--- @param command string: The command to get or create the tab state for
+--- @param opts? table: Optional parameters for the tab state
+--- @return TabStateV2|nil: The tab state for the command
+function M.get_or_create_tab_state(command, opts)
+  if not command or command == '' then
+    print 'Invalid command'
+    return nil
+  end
+
+  -- Check if the tab state already exists
+  if M.tabs_state[command] then
+    if opts then
+      -- If opts are provided, extend the existing tab state with new options
+      M.tabs_state[command] = vim.tbl_deep_extend('force', M.tabs_state[command], opts)
+    end
+    return M.tabs_state[command]
+  end
+
+  -- Create a new tab state if it doesn't exist
+  M.tabs_state[command] = vim.tbl_deep_extend('force', {}, M.default_tab_state, opts or {})
+  return M.tabs_state[command]
+end
+
 --- Gets buffer number by name
 --- @param bufname string: The name of the buffer
 --- @return integer|nil: The buffer number
@@ -229,14 +253,7 @@ function M.display_table(tabular_command, delimiter)
   end
 
   -- Maintain state for the opened tabular commands
-  if not M.tabs_state[tabular_command] then
-    delimiter = delimiter or M.default_delimiter
-    M.tabs_state[tabular_command] = vim.tbl_deep_extend('force', {}, M.default_tab_state, {
-      command = tabular_command,
-      delimiter = delimiter,
-    })
-  end
-  local tab_state = M.tabs_state[tabular_command]
+  local tab_state = M.get_or_create_tab_state(tabular_command, { delimiter = delimiter or M.default_delimiter })
 
   tab_state.bufnr = M.buffer(tabular_command)
 
@@ -353,16 +370,51 @@ function M.sort_by_column(col_index, direction)
       end
     end
 
-    -- check if there is a number in the string
-    local str_num_a = val_a:match '(%d+)' or false
-    local str_num_b = val_b:match '(%d+)' or false
-    if str_num_a and str_num_b then
-      str_num_a = tonumber(str_num_a)
-      str_num_b = tonumber(str_num_b)
-      if tab_state.sort_direction == 1 then
-        return str_num_a < str_num_b
-      else
-        return str_num_a > str_num_b
+    -- Helper function to determine if a string should be sorted numerically
+    local function should_sort_numerically(str)
+      local digits = str:gsub('%D', '')
+      local non_digits = str:gsub('%d', '')
+      
+      -- If no digits, definitely not numeric
+      if #digits == 0 then
+        return false
+      end
+      
+      -- If mostly digits (>= 50% of string), likely numeric
+      if #digits >= #str * 0.5 then
+        return true
+      end
+      
+      -- Check for common numeric patterns: number followed by unit/suffix
+      -- Examples: "1000 GiB", "5.2xlarge", "100MB", "3.5TB"
+      if str:match('^%d+%.?%d*%s*%a*$') then
+        return true
+      end
+      
+      -- If digits are at the beginning and represent a significant portion, likely numeric
+      if str:match('^%d+') and #digits >= #str * 0.3 then
+        return true
+      end
+      
+      return false
+    end
+
+    -- Check if both strings should be sorted numerically
+    local a_numeric = should_sort_numerically(val_a)
+    local b_numeric = should_sort_numerically(val_b)
+    
+    if a_numeric and b_numeric then
+      local str_num_a = val_a:match '(%d+%.?%d*)' or val_a:match '(%d+)'
+      local str_num_b = val_b:match '(%d+%.?%d*)' or val_b:match '(%d+)'
+      
+      if str_num_a and str_num_b then
+        str_num_a = tonumber(str_num_a)
+        str_num_b = tonumber(str_num_b)
+        if tab_state.sort_direction == 1 then
+          return str_num_a < str_num_b
+        else
+          return str_num_a > str_num_b
+        end
       end
     end
 
@@ -555,7 +607,7 @@ end
 
 --- Function to parse the current buffer and display the table
 function M.parse_command(existing_command)
-  local tab_state = existing_command and M.tabs_state[existing_command] or nil
+  local tab_state = existing_command and M.get_or_create_tab_state(existing_command) or nil
   local inputs = {
     command = { prompt = 'Enter command to run: ', default = existing_command or '' },
     interval = { prompt = 'Enter interval (in seconds): ', default = tostring(tab_state and tab_state.interval or M.default_interval) },
@@ -594,10 +646,8 @@ function M.parse_command(existing_command)
               vim.api.nvim_buf_set_name(tab_state.bufnr, command .. ' - ' .. M.bufname_suffix)
             end
           end
-        else
-          M.tabs_state[command] = vim.tbl_deep_extend('force', {}, M.default_tab_state, { command = command })
         end
-        tab_state = M.tabs_state[command]
+        tab_state = M.get_or_create_tab_state(command, { command = command })
 
         tab_state.delimiter = tostring(delimiter)
         tab_state.interval = interval
@@ -699,28 +749,42 @@ function M.ec2_instance_selector_parse(raw_lines)
     return #str
   end, header_spaces)
 
-  M.headers = {}
+  local headers = {}
   local start_pos = 1
   for i, length in ipairs(dashes_lengths) do
     local header = first_line:sub(start_pos, start_pos + length - 1)
-    table.insert(M.headers, vim.trim(header))
+    table.insert(headers, vim.trim(header))
     start_pos = start_pos + length + spaces_lengths[i]
   end
 
   -- Parse data lines
-  M.lines = {}
+  local lines = {}
   for i = 3, #raw_lines do
     local data_start_pos = 1
     local line = raw_lines[i]
     local row = {}
-    table.insert(M.lines, row)
     for j, length in ipairs(dashes_lengths) do
       local word = line:sub(data_start_pos, data_start_pos + length - 1)
       table.insert(row, vim.trim(word))
       data_start_pos = data_start_pos + length + spaces_lengths[j]
     end
-    table.insert(M.lines, row)
+    table.insert(lines, row)
   end
+
+  -- Calculate column widths
+  local col_widths = {}
+  for i, header in ipairs(headers) do
+    col_widths[i] = #header
+    for _, row in ipairs(lines) do
+      col_widths[i] = math.max(col_widths[i], #(row[i] or ''))
+    end
+  end
+
+  return {
+    headers = headers,
+    lines = lines,
+    col_widths = col_widths,
+  }
 end
 
 function M.parse_buffer()
@@ -730,7 +794,14 @@ function M.parse_buffer()
   local second_line = buf_lines[2] or ''
   -- Check if the second line contains dashes seperated by spaces
   if second_line:match '[-=]+%s' then
-    M.ec2_instance_selector_parse(buf_lines)
+    local parse_result = M.ec2_instance_selector_parse(buf_lines)
+    local tab_state = M.get_or_create_tab_state(tabular_command, {
+      command = tabular_command,
+      raw_lines = buf_lines,
+      headers = parse_result.headers,
+      lines = parse_result.lines,
+      col_widths = parse_result.col_widths,
+    })
     M.display_table(tabular_command)
   else
     vim.ui.input({
@@ -741,16 +812,11 @@ function M.parse_buffer()
         return
       end
 
-      -- Initialize tab_state if it doesn't exist
-      if not M.tabs_state[tabular_command] then
-        M.tabs_state[tabular_command] = vim.tbl_deep_extend('force', {}, M.default_tab_state, {
-          command = tabular_command,
-          raw_lines = buf_lines,
-          delimiter = input,
-        })
-      end
-
-      local tab_state = M.tabs_state[tabular_command]
+      local tab_state = M.get_or_create_tab_state(tabular_command, {
+        command = tabular_command,
+        raw_lines = buf_lines,
+        delimiter = input,
+      })
       tab_state.raw_lines = buf_lines
       tab_state.delimiter = input
 
