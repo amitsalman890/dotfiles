@@ -114,9 +114,7 @@ M.setup = function(opts)
   local yaml_lspconfig = {
     on_attach = function(_, bufnr)
       local modeline_added = M.add_crds(bufnr)
-      if modeline_added then
-        -- vim.notify('Added YAML modeline for CRDs', vim.log.levels.INFO, { title = 'YAML LSP' })
-        -- print the CRDs that were added
+      if not vim.tbl_isempty(modeline_added) then
         local crds = table.concat(modeline_added, ', ')
         vim.notify('Added YAML modeline for CRDs: ' .. crds, vim.log.levels.INFO, { title = 'YAML LSP' })
       end
@@ -146,7 +144,7 @@ M.setup = function(opts)
   }
   -- Merge the lists
   vim.list_extend(M.all_schemas, M.k8s_schemas)
-  -- vim.list_extend(M.all_schemas, require('schemastore').json.schemas())
+  vim.list_extend(M.all_schemas, require('schemastore').json.schemas())
   -- vim.list_extend(M.all_schemas, require('user.additional-schemas').crds_as_schemas())
   local yaml_cfg = require('yaml-companion').setup {
     -- log_level = 'debug',
@@ -159,6 +157,14 @@ M.setup = function(opts)
   }
   vim.lsp.config('yamlls', yaml_cfg)
   M.yaml_cfg = yaml_cfg
+
+  -- add actions
+  require('user.menu').add_actions('YAML', {
+    ['Auto add CRD schema modlines'] = function()
+      M.add_crds(0)
+    end,
+  })
+
   return yaml_cfg
 end
 

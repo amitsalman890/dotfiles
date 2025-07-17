@@ -103,6 +103,7 @@ vim.o.history = 10000
 vim.o.termguicolors = true
 vim.o.signcolumn = 'yes'
 vim.o.virtualedit = 'block' -- Allow cursor to move to the end of the line
+vim.opt.nrformats:append 'blank'
 -- require 'user.winbar'
 -- opt.winbar = "%{%v:lua.require'user.winbar'.eval()%}"
 -- vim.o.statuscolumn = '%=%{v:wrap?"":v:relnum?v:relnum:v:lnum} %s%C'
@@ -116,7 +117,6 @@ vim.opt.path:append { '**' }
 
 -- Folding
 vim.o.foldenable = true
--- vim.o.foldmethod = 'syntax'
 vim.opt.foldmethod = 'expr'
 vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.o.foldlevel = 999
