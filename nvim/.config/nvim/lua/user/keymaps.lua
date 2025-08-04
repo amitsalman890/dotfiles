@@ -488,3 +488,8 @@ vim.cmd('source ' .. vim.fn.stdpath 'config' .. '/lua/user/search-replace.vim')
 
 require('user.tabular-v2').setup {}
 require('user.projects').setup()
+
+vim.api.nvim_create_user_command('SplitLine', function()
+  vim.cmd [[.s/,/,\r/g ]]
+end, { desc = 'Split Line' })
+map('n', '<leader>sl', ':SplitLine<cr>', { remap = false, silent = true, desc = 'Split Line' })
