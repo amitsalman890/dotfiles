@@ -12,14 +12,12 @@ local M = {
 }
 
 local cluster_to_profile = {
-  ['spot-prod'] = 'default',
-  ['spot-prod-bi-billing'] = 'default',
-  ['spot-dev-us-east-2'] = 'dev',
+  ['spot-prod'] = 'production-sso',
+  ['spot-prod-killer'] = 'production-sso',
 }
 
 local profile_to_onelogin = {
-  default = 'https://spotinst.onelogin.com/client/apps/select/889121819',
-  dev = 'https://spotinst.onelogin.com/client/apps/select/889121822',
+  ['production-sso'] = 'https://spotinst.onelogin.com/client/apps/select/885672524',
 }
 
 -- open ALB on AWS console
