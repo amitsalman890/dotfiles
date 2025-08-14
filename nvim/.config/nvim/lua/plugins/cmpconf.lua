@@ -2,7 +2,6 @@
 local M = {
   'hrsh7th/nvim-cmp',
   version = false, -- last release is way too old
-  enabled = true,
   event = { 'InsertEnter', 'CmdlineEnter' },
   dependencies = {
     'rafamadriz/friendly-snippets',
@@ -50,6 +49,13 @@ M.config = function()
   local custom_kinds_hl = {}
   vim.api.nvim_set_hl(0, 'CmpItemKindTabNine', { link = 'Green' })
   cmp.setup {
+    enabled = function()
+      local ft = vim.api.nvim_get_option_value('filetype', { buf = 0 })
+      if string.find(ft, 'k8s_') then
+        return false
+      end
+      return true
+    end,
     native_menu = false,
     view = {
       entries = {
@@ -82,8 +88,7 @@ M.config = function()
       end,
     },
     mapping = cmp.mapping.preset.insert {
-      ['<C-Space>'] = cmp.mapping.complete(),
-      -- ['<C-e>'] = cmp.mapping.abort(),
+      [vim.env.CMP_COMPLETION or '<M-Space>'] = cmp.mapping.complete(),
       ['<C-d>'] = cmp.mapping.scroll_docs(4),
       ['<C-u>'] = cmp.mapping.scroll_docs(-4),
       ['<C-j>'] = cmp.mapping(function(fallback)
@@ -126,7 +131,7 @@ M.config = function()
           fallback()
         end
       end, { 'i', 's' }),
-      ['<C-/>'] = cmp.mapping.close(),
+      ['<C-/>'] = cmp.mapping.abort(),
       ['<C-e>'] = cmp.mapping(function(fallback)
         if luasnip.choice_active() then
           luasnip.change_choice(1)
