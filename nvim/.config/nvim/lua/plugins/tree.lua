@@ -32,22 +32,6 @@ local function on_attach(bufnr)
     vim.cmd 'norm k'
   end
 
-  -- marked files operation
-  local mark_trash = function()
-    local marks = api.marks.list()
-    if #marks == 0 then
-      table.insert(marks, api.tree.get_node_under_cursor())
-    end
-    vim.ui.input({ prompt = string.format('Trash %s files? [y/n] ', #marks) }, function(input)
-      if input == 'y' then
-        for _, node in ipairs(marks) do
-          api.fs.trash(node)
-        end
-        api.marks.clear()
-        api.tree.reload()
-      end
-    end)
-  end
   local mark_copy = function()
     local marks = api.marks.list()
     if #marks == 0 then
@@ -113,8 +97,8 @@ local function on_attach(bufnr)
   vim.keymap.set('n', 'J', mark_move_j, opts 'Toggle Bookmark Down')
   vim.keymap.set('n', 'K', mark_move_k, opts 'Toggle Bookmark Up')
 
-  vim.keymap.set('n', 'dd', mark_cut, opts 'Cut File(s)')
-  vim.keymap.set('n', 'yy', mark_copy, opts 'Copy File(s)')
+  vim.keymap.set('n', 'dd', mark_cut, opts 'Cut Bookmarked File(s)')
+  vim.keymap.set('n', 'yy', mark_copy, opts 'Copy Bookmarked File(s)')
 
   vim.keymap.set('n', 'mv', api.marks.bulk.move, opts 'Move Bookmarked')
 
