@@ -50,7 +50,7 @@ return {
   },
   {
     'CopilotC-Nvim/CopilotChat.nvim',
-    enabled = false,
+    enabled = true,
     cmd = {
       'CopilotChat',
       'CopilotChatAgents',
@@ -102,7 +102,7 @@ return {
   },
   {
     'yetone/avante.nvim',
-    enabled = true,
+    enabled = false,
     version = false, -- Never set this value to "*"! Never!
     keys = {
       { '<leader>ccc', '<cmd>AvanteChat<CR>', mode = { 'n', 'v' } },
