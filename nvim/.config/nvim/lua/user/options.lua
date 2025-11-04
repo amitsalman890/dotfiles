@@ -36,10 +36,11 @@ vim.opt.fillchars = {
   foldopen = '',
   foldclose = '',
   foldsep = ' ',
+  foldinner = ' ',
   diff = ' ',
   eob = ' ',
 }
-vim.o.shada = [[!,'1000,s1000,h]]
+vim.o.shada = [[!,'50,s100,h]]
 -- vim.opt.foldcolumn = '1'
 vim.o.emoji = true
 -- go to previous/next line with h,l,left arrow and right arrow
@@ -76,6 +77,7 @@ vim.o.splitbelow = true -- Horizontaly plitted windows open below
 vim.o.splitright = true -- Vertically plitted windows open below bracket for a brief second
 vim.o.startofline = false -- Stop certain movements from always going to the first character of a line.
 vim.o.pumheight = 10 -- pop up menu height
+vim.o.pumborder = 'rounded' -- Popup border style
 vim.o.pumblend = 40 -- Popup blend
 vim.o.confirm = true -- Prompt confirmation if exiting unsaved file
 vim.o.lazyredraw = false -- redraw only when we need to.
@@ -124,7 +126,42 @@ vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.o.foldlevel = 999
 vim.o.foldlevelstart = 99
 vim.o.foldcolumn = '1' -- '0' is not bad
-vim.o.foldtext = 'substitute(getline(v:foldstart),"\t",repeat(" ",&tabstop),"g")."...".trim(getline(v:foldend))'
+local function fold_virt_text(result, s, lnum, coloff)
+  if not coloff then
+    coloff = 0
+  end
+  local text = ''
+  local hl
+  for i = 1, #s do
+    local char = s:sub(i, i)
+    local hls = vim.treesitter.get_captures_at_pos(0, lnum, coloff + i - 1)
+    local _hl = hls[#hls]
+    if _hl then
+      local new_hl = '@' .. _hl.capture
+      if new_hl ~= hl then
+        table.insert(result, { text, hl })
+        text = ''
+        hl = nil
+      end
+      text = text .. char
+      hl = new_hl
+    else
+      text = text .. char
+    end
+  end
+  table.insert(result, { text, hl })
+end
+function _G.custom_foldtext()
+  local start = vim.fn.getline(vim.v.foldstart):gsub('\t', string.rep(' ', vim.o.tabstop))
+  local end_str = vim.fn.getline(vim.v.foldend)
+  local end_ = vim.trim(end_str)
+  local result = {}
+  fold_virt_text(result, start, vim.v.foldstart - 1)
+  table.insert(result, { ' ⋯ ', 'Delimiter' })
+  fold_virt_text(result, end_, vim.v.foldend - 1, #(end_str:match '^(%s+)' or ''))
+  return result
+end
+vim.opt.foldtext = 'v:lua.custom_foldtext()'
 
 -- Support undercurl
 vim.cmd [[

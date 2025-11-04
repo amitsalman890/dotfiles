@@ -22,7 +22,7 @@ return {
     diff = { bin = 'kdiff' },
     filter = {
       apply_on_select_from_history = false,
-      max_history = 100,
+      max_history = 30,
     },
     logs = {
       since = '30s',
@@ -48,6 +48,22 @@ return {
     { '9', '<Plug>(kubectl.view_statefulsets)', ft = 'k8s_*' },
     { '<C-t>', '<Plug>(kubectl.view_top)', ft = 'k8s_*' },
     {
+      '<C-y>',
+      function()
+        local _, buf_name = pcall(vim.api.nvim_buf_get_var, 0, 'buf_name')
+        local view = require('kubectl.views').resource_and_definition(vim.trim(buf_name))
+        if not view then
+          return
+        end
+
+        local name, ns = view.getCurrentSelection()
+        local txt = ns and (name .. ' -n ' .. ns) or name
+        vim.fn.setreg('+', txt)
+        vim.notify('Copied to clipboard: ' .. txt, vim.log.levels.INFO)
+      end,
+      ft = 'k8s_*',
+    },
+    {
       'Z',
       function()
         local state = require 'kubectl.state'
@@ -69,6 +85,7 @@ return {
       group = group,
       pattern = 'k8s_*',
       callback = function()
+        vim.o.relativenumber = false
         vim.opt.titlestring = '❄️ k8s: %t'
         if vim.bo.filetype == 'k8s_yaml' then
           vim.bo.filetype = 'yaml'
