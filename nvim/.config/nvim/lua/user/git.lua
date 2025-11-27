@@ -142,6 +142,17 @@ M.get_branches_sync = function(remote_name)
   return branches
 end
 
+M.get_toplevel = function(cb)
+  run_git({ 'rev-parse', '--show-toplevel' }, nil, function(toplevel)
+    cb(vim.trim(toplevel))
+  end)
+end
+
+M.get_toplevel_sync = function()
+  local toplevel = run_git_sync({ 'rev-parse', '--show-toplevel' }, nil).stdout or ''
+  return vim.trim(toplevel)
+end
+
 M.checkout = function(branch_name)
   run_git({ 'checkout', branch_name }, 'Checking out ' .. branch_name)
 end
@@ -170,7 +181,7 @@ M.create_pull_request = function()
   M.get_remotes(function(git_remotes)
     local git_remote_url = git_remotes['origin']
     local prefix = git_remote_url:match '^%w+' == 'git' and 'git@' or 'https://'
-    local git_name, project, repo = git_remote_url:match(('^' .. prefix .. '(%w+).com[:/](.+)/(.+)%.git'))
+    local git_name, project, repo = git_remote_url:match(('^' .. prefix .. '(%w+).com.*[:/](.+)/(.+)%.git'))
     local pr_link = git_name == 'gitlab' and '-/merge_requests/new?merge_request[source_branch]=' or 'pull/new/'
 
     M.get_branch(function(branch_name)

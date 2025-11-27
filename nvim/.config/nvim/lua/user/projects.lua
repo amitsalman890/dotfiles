@@ -44,7 +44,7 @@ end
 -- Find existing nvim project tab
 local function find_project_tab(project_name, panes)
   for _, pane in ipairs(panes) do
-    if pane.title == ('nvim: ' .. project_name) then
+    if pane.title:match('nvim: ' .. vim.pesc(project_name) .. '$') then
       return pane
     end
   end
@@ -76,13 +76,14 @@ function M.pick_project()
   local fzf = require 'fzf-lua'
 
   -- Get all directories from Repos and dotfiles
-  local all_dirs = get_directories { '~/Repos/', '~/.dotfiles' }
+  local dirs_from_env = vim.split(vim.env.PJ_DIRS, ',') or { '~/Repos/', '~/.dotfiles' }
+  local all_dirs = get_directories(dirs_from_env)
 
   -- Get active projects from wezterm
   local active_projects = {}
   local panes = get_wezterm_panes()
   for _, pane in ipairs(panes) do
-    local project_name = pane.title:match '^nvim: (.+)$'
+    local project_name = pane.title:match 'nvim: (.+)$'
     if project_name then
       active_projects[project_name] = pane
     end

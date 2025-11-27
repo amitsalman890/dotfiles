@@ -223,7 +223,7 @@ map('n', '<C-c>', 'ciw', { desc = 'Change inner word' })
 map('n', '<C-c>', 'ciw')
 
 -- Select last inserted text
-map('n', 'gV', '`[v`]', { remap = false, desc = 'Visually select last insert' })
+map('n', 'gV', '`[V`]', { remap = false, desc = 'Visually select last insert' })
 
 -- Convert all tabs to spaces
 map('n', '<leader>ct<space>', ':retab<cr>', { remap = false, silent = true })
@@ -271,9 +271,17 @@ local function b64(action)
   local finish = vim.api.nvim_buf_get_mark(0, ']')
   local line = vim.api.nvim_buf_get_text(0, start[1] - 1, start[2], finish[1] - 1, finish[2] + 1, {})[1]
   local b64_action = action == 'encode' and vim.base64.encode or vim.base64.decode
-  local new_text = { b64_action(line) }
+  local result = b64_action(line)
+
+  -- Split result by newlines to handle multi-line decoded text
+  local new_text = vim.split(result, '\n', { plain = true })
+
   vim.api.nvim_buf_set_text(0, start[1] - 1, start[2], finish[1] - 1, finish[2] + 1, new_text)
-  vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { finish[1], finish[2] })
+
+  -- Update cursor position to end of replaced text
+  local new_end_row = start[1] - 1 + #new_text - 1
+  local new_end_col = #new_text[#new_text]
+  vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { new_end_row + 1, new_end_col })
 end
 function _G.__base64_encode(motion)
   if motion == nil or motion == 'line' then
@@ -330,7 +338,13 @@ end, {})
 -- Where am I? --
 -----------------
 vim.api.nvim_create_user_command('Whereami', function()
-  local country_data = vim.json.decode(require('plenary.curl').get('http://ipconfig.io/json').body)
+  local result = vim.system({ 'curl', '-s', 'http://ipconfig.io/json' }):wait()
+  vim.print('result: ' .. vim.inspect(result))
+  if result.code ~= 0 then
+    vim.notify('Failed to fetch location data', vim.log.levels.ERROR)
+    return
+  end
+  local country_data = vim.json.decode(result.stdout)
   local iso = country_data.country_iso
   local country = country_data.country
   local emoji = require('user.utils').country_os_to_emoji(iso)
@@ -404,11 +418,6 @@ vmap <c-r> :VisualCalculator<cr>
 -- Grep --
 ----------
 require('user.grep').setup()
-
---------------
--- DiffTool --
---------------
-require('user.difftool').setup()
 
 ------------------------
 -- Run current buffer --
@@ -490,7 +499,24 @@ require('user.tabular-v2').setup {}
 require('user.projects').setup()
 require 'user.number-separators'
 
-vim.api.nvim_create_user_command('SplitLine', function()
-  vim.cmd [[.s/,/,\r/g ]]
-end, { desc = 'Split Line' })
-map('n', '<leader>sl', ':SplitLine<cr>', { remap = false, silent = true, desc = 'Split Line' })
+--------------
+-- Difftool --
+--------------
+vim.api.nvim_create_user_command('DirDiff', function(opts)
+  if vim.tbl_count(opts.fargs) ~= 2 then
+    vim.notify('DirDiff requires exactly two directory arguments', vim.log.levels.ERROR)
+    return
+  end
+
+  if not opts.bang then
+    vim.cmd 'tabnew'
+  end
+
+  vim.cmd.packadd 'nvim.difftool'
+  require('difftool').open(opts.fargs[1], opts.fargs[2], {
+    rename = {
+      detect = false,
+    },
+    ignore = { '.git' },
+  })
+end, { complete = 'dir', nargs = '*', bang = true, desc = 'Diff two directories (bang to not open in a new tab)' })
