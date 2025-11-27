@@ -113,16 +113,12 @@ local M = {
     event = 'BufReadPost',
   },
   {
-    'OXY2DEV/markview.nvim',
-    lazy = true,
-    -- For `nvim-treesitter` users.
-    priority = 49,
+    -- Make sure to set this up properly if you have lazy=true
+    'MeanderingProgrammer/render-markdown.nvim',
     opts = {
-      preview = {
-        filetypes = { 'markdown', 'codecompanion' },
-        ignore_buftypes = {},
-      },
+      file_types = { 'markdown', 'Avante' },
     },
+    ft = { 'markdown', 'Avante' },
   },
 }
 

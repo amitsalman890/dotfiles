@@ -1,4 +1,4 @@
-local model = 'claude-sonnet-4'
+local model = 'claude-sonnet-4.5'
 return {
   {
     'zbirenbaum/copilot.lua',
@@ -37,10 +37,11 @@ return {
     opts = {
       extensions = {
         avante = {
+          enabled = true,
           make_slash_commands = true, -- make /slash commands from MCP server prompts
         },
         copilotchat = {
-          enabled = true,
+          enabled = false,
           convert_tools_to_functions = true, -- Convert MCP tools to CopilotChat functions
           convert_resources_to_functions = true, -- Convert MCP resources to CopilotChat functions
           add_mcp_prefix = true, -- Add "mcp_" prefix to function names
@@ -50,7 +51,7 @@ return {
   },
   {
     'CopilotC-Nvim/CopilotChat.nvim',
-    enabled = true,
+    enabled = false,
     cmd = {
       'CopilotChat',
       'CopilotChatAgents',
@@ -98,6 +99,29 @@ return {
         desc = 'CopilotChat - Prompt actions',
         mode = { 'n', 'v' },
       },
+    },
+  },
+  {
+    'coder/claudecode.nvim',
+    enabled = true,
+    opts = {},
+    keys = {
+      { '<leader>ccc', '<cmd>ClaudeCode<cr>', desc = 'Toggle Claude' },
+      -- { '<leader>af', '<cmd>ClaudeCodeFocus<cr>', desc = 'Focus Claude' },
+      -- { '<leader>ar', '<cmd>ClaudeCode --resume<cr>', desc = 'Resume Claude' },
+      -- { '<leader>aC', '<cmd>ClaudeCode --continue<cr>', desc = 'Continue Claude' },
+      -- { '<leader>am', '<cmd>ClaudeCodeSelectModel<cr>', desc = 'Select Claude model' },
+      -- { '<leader>ab', '<cmd>ClaudeCodeAdd %<cr>', desc = 'Add current buffer' },
+      -- { '<leader>as', '<cmd>ClaudeCodeSend<cr>', mode = 'v', desc = 'Send to Claude' },
+      {
+        '<leader>cca',
+        '<cmd>ClaudeCodeTreeAdd<cr>',
+        desc = 'Add file',
+        ft = { 'NvimTree', 'neo-tree', 'oil', 'minifiles', 'netrw' },
+      },
+      -- Diff management
+      -- { '<leader>aa', '<cmd>ClaudeCodeDiffAccept<cr>', desc = 'Accept diff' },
+      -- { '<leader>ad', '<cmd>ClaudeCodeDiffDeny<cr>', desc = 'Deny diff' },
     },
   },
   {
@@ -156,6 +180,7 @@ return {
         -- support for image pasting
         'HakonHarnes/img-clip.nvim',
         event = 'VeryLazy',
+        keys = { { '<leader>p', '<cmd>PasteImage<cr>', desc = 'Paste image from system clipboard', ft = { 'AvanteInput' } } },
         opts = {
           -- recommended settings
           default = {
@@ -169,14 +194,6 @@ return {
           },
         },
       },
-      -- {
-      --   -- Make sure to set this up properly if you have lazy=true
-      --   'MeanderingProgrammer/render-markdown.nvim',
-      --   opts = {
-      --     file_types = { 'markdown', 'Avante' },
-      --   },
-      --   ft = { 'markdown', 'Avante' },
-      -- },
     },
   },
 }
