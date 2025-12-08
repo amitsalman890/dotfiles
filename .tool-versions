@@ -24,5 +24,3 @@ lua 5.1.5
 rust stable
 vim 9.1.0958
 ripgrep 14.1.1
-helm 3.14.4
-kubectl 1.30.9
