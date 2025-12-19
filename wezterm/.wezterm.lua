@@ -1,8 +1,10 @@
-local wez = require 'wezterm'
-local act = wez.action
-local config = wez.config_builder()
+-- ~/.wezterm.lua
+local wezterm = require 'wezterm'
+local act = wezterm.action
+local config = wezterm.config_builder()
 local HOME = os.getenv 'HOME'
 
+-- color scheme
 local color = 'Rosé Pine Moon (Gogh)'
 config.color_scheme = color
 
@@ -22,7 +24,9 @@ config.harfbuzz_features = {
   'ss02=1',
   'ss19=1',
 }
-config.font = wez.font_with_fallback { { family = 'CaskaydiaCove Nerd Font', weight = 'DemiBold' } }
+config.font = wezterm.font_with_fallback {
+  { family = 'CaskaydiaCove Nerd Font', weight = 'DemiBold' },
+}
 config.font_size = 16
 config.freetype_load_target = 'Normal'
 config.custom_block_glyphs = false
@@ -36,36 +40,22 @@ config.use_fancy_tab_bar = true
 config.show_close_tab_button_in_tabs = true
 config.tab_max_width = 999
 config.window_frame = {
-  font = wez.font { family = 'Roboto', weight = 'Bold' },
+  font = wezterm.font { family = 'Roboto', weight = 'Bold' },
   font_size = 13.0,
 }
 config.colors = {
   background = '#000000',
   scrollbar_thumb = 'white',
   tab_bar = {
-    active_tab = {
-      bg_color = '#5B5B5A',
-      fg_color = '#FFFFFF',
-    },
-    inactive_tab = {
-      bg_color = '#1B1B1B',
-      fg_color = '#808080',
-    },
+    active_tab = { bg_color = '#5B5B5A', fg_color = '#FFFFFF' },
+    inactive_tab = { bg_color = '#1B1B1B', fg_color = '#808080' },
   },
 }
 
 -- window
 config.window_decorations = 'INTEGRATED_BUTTONS|RESIZE'
-config.inactive_pane_hsb = {
-  saturation = 0.4,
-  brightness = 0.7,
-}
-config.window_padding = {
-  left = 0,
-  right = 0,
-  top = 0,
-  bottom = 0,
-}
+config.inactive_pane_hsb = { saturation = 0.4, brightness = 0.7 }
+config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 config.enable_scroll_bar = true
 config.min_scroll_bar_height = '2cell'
 config.native_macos_fullscreen_mode = true
@@ -73,15 +63,9 @@ config.native_macos_fullscreen_mode = true
 -- background
 config.background = {
   {
-    source = {
-      File = HOME .. '/Pictures/wp4.jpg',
-    },
+    source = { File = HOME .. '/Pictures/wp4.jpg' },
     repeat_y = 'NoRepeat',
-    hsb = {
-      brightness = 0.15,
-      hue = 1.0,
-      saturation = 1.0,
-    },
+    hsb = { brightness = 0.15, hue = 1.0, saturation = 1.0 },
     height = 'Cover',
     width = 'Contain',
     opacity = 1.0,
@@ -98,10 +82,13 @@ config.mouse_bindings = {
   },
 }
 
--- keys
-config.keys = {-- Unmap Option+Enter
-  { key = 'Enter', mods = 'OPT', action = act.DisableDefaultAssignment,
-  {key="Enter", mods="SHIFT", action=wezterm.action{SendString="\x1b\r"}},},
+-- keys: each binding is its own table; the array is properly closed
+config.keys = {
+  -- Unmap Option+Enter
+  { key = 'Enter', mods = 'OPT', action = act.DisableDefaultAssignment },
+
+  -- Shift+Enter: send ESC + CR (your intent)
+  { key = 'Enter', mods = 'SHIFT', action = act.SendString '\x1b\r' },
 
   -- split pane
   { key = 'd', mods = 'CMD', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } },
@@ -119,22 +106,15 @@ config.keys = {-- Unmap Option+Enter
   -- kill pane
   { key = 'w', mods = 'CMD', action = act.CloseCurrentPane { confirm = true } },
 
-  -- increase/decrease font size by cmd+/-/=
+  -- increase font size by cmd-+
   { key = '+', mods = 'CMD', action = act.IncreaseFontSize },
-}
+} -- ← this closes the keys array
 
--- arrow keys keybindings
+-- arrow keys keybindings (append more entries to config.keys)
 for _, direction in ipairs { 'Left', 'Right', 'Up', 'Down' } do
-  -- move between panes
-  -- table.insert(config.keys, { key = direction .. 'Arrow', mods = 'CMD|OPT', action = act.ActivatePaneDirection(direction) })
-
-  -- resize panes
-  -- table.insert(config.keys, { key = direction .. 'Arrow', mods = 'CTRL|CMD', action = act.AdjustPaneSize { direction, 3 } })
-
   if direction == 'Left' or direction == 'Right' then
-    -- Sends ESC + b and ESC + f sequence, which is used
-    -- for telling your shell to jump back/forward.
-    local letter = direction == 'Left' and 'b' or 'f'
+    -- ESC+b / ESC+f for word back/forward
+    local letter = (direction == 'Left') and 'b' or 'f'
     table.insert(config.keys, {
       key = direction .. 'Arrow',
       mods = 'OPT',
@@ -142,48 +122,34 @@ for _, direction in ipairs { 'Left', 'Right', 'Up', 'Down' } do
     })
 
     -- Move to the left/right tab
-    local relative = direction == 'Left' and -1 or 1
+    local relative = (direction == 'Left') and -1 or 1
     table.insert(config.keys, { key = direction .. 'Arrow', mods = 'CMD', action = act.ActivateTabRelative(relative) })
 
     -- rotate panes
-    local rotate = direction == 'Left' and 'CounterClockwise' or 'Clockwise'
+    local rotate = (direction == 'Left') and 'CounterClockwise' or 'Clockwise'
     table.insert(config.keys, { key = direction .. 'Arrow', mods = 'CTRL|SHIFT', action = act.RotatePanes(rotate) })
 
-    -- move tab to the left/right with cmd+shift+left/right
+    -- move tab left/right with cmd+shift+arrow
     table.insert(config.keys, { key = direction .. 'Arrow', mods = 'CMD|SHIFT', action = act.MoveTabRelative(relative) })
   else
-    -- scroll up using option+arrow
+    -- scroll up/down using option+arrow
     table.insert(config.keys, { key = direction .. 'Arrow', mods = 'OPT', action = act.ScrollByPage(direction == 'Up' and -0.2 or 0.2) })
 
-    -- scroll to last command
+    -- scroll to last/next prompt with cmd+arrow
     table.insert(config.keys, { key = direction .. 'Arrow', mods = 'CMD', action = act.ScrollToPrompt(direction == 'Up' and -1 or 1) })
   end
 end
 
+-- number keys: switch to tabs 1–9
 for i = 1, 9 do
   table.insert(config.keys, { key = tostring(i), mods = 'CMD', action = act.ActivateTab(i - 1) })
 end
 
-local smart_splits = wez.plugin.require 'https://github.com/mrjones2014/smart-splits.nvim'
+-- plugin
+local smart_splits = wezterm.plugin.require 'https://github.com/mrjones2014/smart-splits.nvim'
 smart_splits.apply_to_config(config, {
-  -- the default config is here, if you'd like to use the default keys,
-  -- you can omit this configuration table parameter and just use
-  -- smart_splits.apply_to_config(config)
-
-  -- directional keys to use in order of: left, down, up, right
   direction_keys = { 'h', 'j', 'k', 'l' },
-  -- if you want to use separate direction keys for move vs. resize, you
-  -- can also do this:
-  -- direction_keys = {
-  --   move = { 'h', 'j', 'k', 'l' },
-  --   resize = { 'LeftArrow', 'DownArrow', 'UpArrow', 'RightArrow' },
-  -- },
-  -- modifier keys to combine with direction_keys
-  modifiers = {
-    move = 'CTRL', -- modifier to use for pane movement, e.g. CTRL+h to move left
-    resize = 'META', -- modifier to use for pane resize, e.g. META+h to resize to the left
-  },
-  -- log level to use: info, warn, error
+  modifiers = { move = 'CTRL', resize = 'META' },
   log_level = 'info',
 })
 
