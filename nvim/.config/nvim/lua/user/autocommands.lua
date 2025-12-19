@@ -120,6 +120,19 @@ autocmd('BufReadPost', {
   end,
 })
 
+-- better yank ring
+vim.api.nvim_create_autocmd('TextYankPost', { -- yank-ring
+  desc = 'Maintain a yank ring in registers 0-9',
+  group = buffer_settings,
+  callback = function()
+    if vim.v.event.operator == 'y' then
+      for i = 9, 1, -1 do -- Shift all numbered registers.
+        vim.fn.setreg(tostring(i), vim.fn.getreg(tostring(i - 1)))
+      end
+    end
+  end,
+})
+
 -- Special filetypes
 local special_filetypes = augroup 'SpecialFiletype'
 autocmd({ 'FileType' }, {
@@ -130,12 +143,24 @@ autocmd({ 'FileType' }, {
 autocmd({ 'FileType' }, {
   group = special_filetypes,
   pattern = 'javascript',
-  command = 'set iskeyword+=-',
+  command = 'setlocal iskeyword+=-',
 })
 autocmd({ 'FileType' }, {
   group = special_filetypes,
   pattern = 'nginx',
   command = 'setlocal iskeyword+=$',
+})
+autocmd({ 'FileType' }, {
+  group = special_filetypes,
+  pattern = { 'markdown', 'gitcommit', 'text' },
+  callback = function()
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = { 'en' }
+    vim.api.nvim_set_hl(0, 'SpellBad', {
+      undercurl = true,
+      sp = '#ff5555', -- curl color
+    })
+  end,
 })
 
 -- Quickfix

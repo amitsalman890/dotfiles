@@ -3,8 +3,22 @@ return {
   {
     'zbirenbaum/copilot.lua',
     event = { 'InsertEnter' },
+    dependencies = {
+      'copilotlsp-nvim/copilot-lsp',
+      init = function()
+        vim.g.copilot_nes_debounce = 500
+      end,
+    },
     config = function()
       require('copilot').setup {
+        nes = {
+          enabled = false,
+          keymap = {
+            accept_and_goto = '<leader>p',
+            accept = false,
+            dismiss = '<Esc>',
+          },
+        },
         copilot_node_command = 'node',
         filetypes = { ['*'] = true },
         panel = {
@@ -103,7 +117,7 @@ return {
   },
   {
     'coder/claudecode.nvim',
-    enabled = true,
+    enabled = false,
     opts = {},
     keys = {
       { '<leader>ccc', '<cmd>ClaudeCode<cr>', desc = 'Toggle Claude' },
@@ -127,7 +141,7 @@ return {
   {
     'yetone/avante.nvim',
     build = 'make',
-    enabled = false,
+    enabled = true,
     version = false, -- Never set this value to "*"! Never!
     keys = {
       { '<leader>ccc', '<cmd>AvanteChat<CR>', mode = { 'n', 'v' } },
@@ -179,7 +193,6 @@ return {
       {
         -- support for image pasting
         'HakonHarnes/img-clip.nvim',
-        event = 'VeryLazy',
         keys = { { '<leader>p', '<cmd>PasteImage<cr>', desc = 'Paste image from system clipboard', ft = { 'AvanteInput' } } },
         opts = {
           -- recommended settings

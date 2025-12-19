@@ -24,6 +24,16 @@ M.setup = function()
     'yamlls',
   }
 
+  -- Custom hover for bashls with tldr integration
+  vim.lsp.config('bashls', {
+    on_attach = function(_, bufnr)
+      -- Override K keymap for bashls to use custom hover
+      vim.keymap.set('n', 'K', function()
+        require('user.lsp.bashls-hover').hover()
+      end, { buffer = bufnr, silent = true, desc = 'Hover with tldr' })
+    end,
+  })
+
   vim.lsp.config('jsonls', {
     settings = {
       json = {
@@ -71,39 +81,12 @@ M.setup = function()
   })
 
   vim.lsp.config('terraformls', {
-    on_attach = function(c)
+    on_attach = function()
       require('user.terraform-docs').setup {}
       -- c.server_capabilities.semanticTokensProvider = {}
       vim.o.commentstring = '# %s'
     end,
   })
-
-  -- local yaml_cfg = {
-  --   yaml = {
-  --     format = {
-  --       bracketSpacing = false,
-  --     },
-  --     -- schemas = require('schemastore').yaml.schemas(),
-  --     -- schemas = vim.tbl_deep_extend('force', { [require('kubernetes').yamlls_schema()] = '*.yaml' }, require('schemastore').yaml.schemas()),
-  --     schemaStore = {
-  --       -- Must disable built-in schemaStore support to use
-  --       -- schemas from SchemaStore.nvim plugin
-  --       enable = false,
-  --       -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
-  --       url = '',
-  --     },
-  --     schemas = {},
-  --   },
-  -- }
-  -- vim.lsp.config('yamlls', {
-  --   capabilities = vim.tbl_deep_extend('force', capabilities, {
-  --     textDocument = {
-  --       foldingRange = {
-  --         dynamicRegistration = true,
-  --       },
-  --     },
-  --   }),
-  -- })
 
   local yaml_cfg = require('user.lsp.yaml').setup { capabilities = capabilities }
 

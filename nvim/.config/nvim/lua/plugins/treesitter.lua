@@ -1,61 +1,9 @@
 local treesitter_plugin = {
   'nvim-treesitter/nvim-treesitter',
   branch = 'main',
-  lazy = false,
   build = ':TSUpdate',
-  event = 'BufReadPost',
-  config = function()
-    require('nvim-treesitter').setup { install_dir = vim.fn.stdpath 'data' .. '/treesitter' }
-    require('nvim-treesitter').install {
-      'awk',
-      'bash',
-      'comment',
-      'csv',
-      'diff',
-      'dockerfile',
-      'embedded_template',
-      'git_config',
-      'gitcommit',
-      'gitignore',
-      'go',
-      'gomod',
-      'gosum',
-      'gotmpl',
-      'gowork',
-      'graphql',
-      'groovy',
-      'hcl',
-      'helm',
-      'hjson',
-      'html',
-      'http',
-      'java',
-      'javascript',
-      'json',
-      'jsonc',
-      'lua',
-      'luadoc',
-      'make',
-      'markdown',
-      'markdown_inline',
-      'python',
-      'query',
-      'regex',
-      'scss',
-      'sql',
-      'ssh_config',
-      'terraform',
-      'toml',
-      'tsx',
-      'typescript',
-      'vim',
-      'vimdoc',
-      'xml',
-      'yaml',
-    }
-
-    vim.treesitter.language.register('markdown', 'octo')
-
+  event = { 'BufReadPost', 'FileType' },
+  init = function()
     local augroup = vim.api.nvim_create_augroup('myconfig.treesitter', { clear = true })
     vim.api.nvim_create_autocmd('FileType', {
       group = augroup,
@@ -71,25 +19,86 @@ local treesitter_plugin = {
 
         if not is_installed then
           local available_langs = require('nvim-treesitter').get_available()
-          local is_available = vim.tbl_contains(available_langs, lang)
-
-          if is_available then
+          if vim.tbl_contains(available_langs, lang) then
             vim.notify('Parser available for ' .. lang .. '. Please add to install func', vim.log.levels.INFO)
-            return
           end
+          return
         end
 
-        local ok, _ = pcall(vim.treesitter.start, event.buf)
-        if not ok then
+        if not pcall(vim.treesitter.start, event.buf) then
           return
         end
 
         vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 
-        vim.wo.foldmethod = 'expr'
-        vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+        vim.wo[0][0].foldmethod = 'expr'
+        vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
       end,
     })
+  end,
+
+  config = function()
+    require('nvim-treesitter').setup { install_dir = vim.fn.stdpath 'data' .. '/treesitter' }
+    require('nvim-treesitter').install {
+      'awk',
+      'bash',
+      'comment',
+      'css',
+      'csv',
+      'diff',
+      'dockerfile',
+      'editorconfig',
+      'embedded_template',
+      'git_config',
+      'git_rebase',
+      'gitcommit',
+      'gitignore',
+      'go',
+      'gomod',
+      'gosum',
+      'gotmpl',
+      'gowork',
+      'graphql',
+      'groovy',
+      'hcl',
+      'helm',
+      'hjson',
+      'html',
+      'http',
+      'ini',
+      'java',
+      'javascript',
+      'jinja',
+      'jinja_inline',
+      'jq',
+      'json',
+      'jsonc',
+      'lua',
+      'luadoc',
+      'luap',
+      'make',
+      'markdown',
+      'markdown_inline',
+      'passwd',
+      'pem',
+      'printf',
+      'python',
+      'query',
+      'regex',
+      'requirements',
+      'scss',
+      'sql',
+      'ssh_config',
+      'terraform',
+      'toml',
+      'tsx',
+      'typescript',
+      'vim',
+      'vimdoc',
+      'xml',
+      'yaml',
+      'zsh',
+    }
   end,
 }
 
@@ -112,7 +121,7 @@ return {
   },
   {
     'windwp/nvim-ts-autotag',
-    ft = { 'html', 'javascript', 'jsx', 'markdown', 'typescript', 'xml', 'markdown' },
+    ft = { 'html', 'javascript', 'jsx', 'markdown', 'typescript', 'xml' },
     opts = {},
   },
 }

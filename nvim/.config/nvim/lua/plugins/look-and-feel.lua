@@ -42,6 +42,10 @@ local M = {
         },
       },
     },
+    config = function(_, opts)
+      require('nvim-web-devicons').setup(opts)
+      require('nvim-web-devicons').set_icon_by_filetype { fugitive = 'git' }
+    end,
   },
   {
     'eero-lehtinen/oklch-color-picker.nvim',
@@ -51,7 +55,7 @@ local M = {
       },
     },
     keys = {
-      { '<Leader>pc', '<cmd>lua require("oklch-color-picker").pick_under_cursor()<CR>' },
+      { '<Leader>pc', '<cmd>lua require("oklch-color-picker").pick_under_cursor()<CR>', desc = 'Pick color under cursor' },
     },
   },
   {

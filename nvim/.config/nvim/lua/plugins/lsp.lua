@@ -2,6 +2,34 @@ local M = {
   {
     'neovim/nvim-lspconfig',
     event = { 'BufReadPre', 'BufNewFile' },
+    init = require('user.lsp.config').init,
+    config = require('user.lsp.config').setup,
+    dependencies = {
+      'nvimtools/none-ls.nvim',
+      'mason-org/mason.nvim',
+      {
+        'j-hui/fidget.nvim',
+        opts = {
+          progress = {
+            display = {
+              progress_icon = { pattern = 'moon', period = 1 },
+            },
+          },
+        },
+      },
+      {
+        'SmiteshP/nvim-navic',
+        lazy = true,
+        opts = {
+          highlight = true,
+        },
+        config = function(_, opts)
+          local navic = require 'nvim-navic'
+          navic.setup(opts)
+          vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+        end,
+      },
+    },
   },
   {
     'mason-org/mason.nvim',
@@ -64,36 +92,6 @@ local M = {
   },
 }
 
-M[1].init = require('user.lsp.config').init
-M[1].config = require('user.lsp.config').setup
-
-M[1].dependencies = {
-  'nvimtools/none-ls.nvim',
-  'mason-org/mason.nvim',
-  {
-    'j-hui/fidget.nvim',
-    opts = {
-      progress = {
-        display = {
-          progress_icon = { pattern = 'moon', period = 1 },
-        },
-      },
-    },
-  },
-  {
-    'SmiteshP/nvim-navic',
-    lazy = true,
-    opts = {
-      highlight = true,
-    },
-    config = function(_, opts)
-      local navic = require 'nvim-navic'
-      navic.setup(opts)
-      vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
-    end,
-  },
-}
-
 local language_specific_plugins = {
   { 'cuducos/yaml.nvim', ft = 'yaml' },
   {
@@ -118,7 +116,7 @@ local language_specific_plugins = {
     'mosheavni/yaml-companion.nvim',
     ft = 'yaml',
     config = function()
-      vim.keymap.set('n', '<leader>cc', ":lua require('yaml-companion').open_ui_select()<cr>", { remap = false, silent = true })
+      vim.keymap.set('n', '<leader>cs', ":lua require('yaml-companion').open_ui_select()<cr>", { remap = false, silent = true })
       require('user.menu').add_actions('YAML', {
         ['Change Schema'] = function()
           require('yaml-companion').open_ui_select()
@@ -169,7 +167,6 @@ local language_specific_plugins = {
         group = format_sync_grp,
       })
     end,
-    event = { 'CmdlineEnter' },
     ft = { 'go', 'gomod' },
     build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
   },

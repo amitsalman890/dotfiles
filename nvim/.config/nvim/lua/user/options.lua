@@ -54,7 +54,9 @@ vim.opt.diffopt = {
   'linematch:60',
   'vertical',
   'algorithm:histogram',
+  'inline:char',
 }
+
 vim.o.splitkeep = 'screen'
 
 vim.o.number = true -- Show current line number
@@ -86,6 +88,7 @@ vim.o.backup = false
 vim.o.backupdir = vim.fn.stdpath 'state' .. '/backup'
 vim.o.writebackup = false
 vim.o.wildmenu = true -- Displays a menu on autocomplete
+vim.opt.wildoptions:append { 'fuzzy', 'pum' }
 vim.opt.wildmode = { 'longest:full', 'full' } -- Command-line completion mode
 vim.opt.completeopt = 'menu,menuone,noselect,noinsert,popup'
 vim.o.previewheight = 15
@@ -122,7 +125,6 @@ vim.opt.path:append { '**' }
 -- Folding
 vim.o.foldenable = true
 vim.opt.foldmethod = 'expr'
-vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.o.foldlevel = 999
 vim.o.foldlevelstart = 99
 vim.o.foldcolumn = '1' -- '0' is not bad
@@ -234,12 +236,4 @@ require('user.input').setup()
 -----------
 -- EXTUI --
 -----------
--- require('vim._extui').enable {
---   enable = true, -- Whether to enable or disable the UI.
---   msg = { -- Options related to the message module.
---     ---@type 'cmd'|'msg' Where to place regular messages, either in the
---     ---cmdline or in a separate ephemeral message window.
---     target = 'cmd',
---     timeout = 4000, -- Time a message is visible in the message window.
---   },
--- }
+-- require('vim._extui').enable { enable = true, msg = { target = 'cmd' } }
