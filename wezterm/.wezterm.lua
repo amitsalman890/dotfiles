@@ -99,9 +99,9 @@ config.mouse_bindings = {
 }
 
 -- keys
-config.keys = {
-  -- Unmap Option+Enter
-  { key = 'Enter', mods = 'OPT', action = act.DisableDefaultAssignment },
+config.keys = {-- Unmap Option+Enter
+  { key = 'Enter', mods = 'OPT', action = act.DisableDefaultAssignment,
+  {key="Enter", mods="SHIFT", action=wezterm.action{SendString="\x1b\r"}},},
 
   -- split pane
   { key = 'd', mods = 'CMD', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } },
