@@ -1,8 +1,8 @@
 # Amit Salman's DotFiles
 
-<a href="https://dotfyle.com/Amit-proj/dotfiles-nvim-config-nvim"><img src="https://dotfyle.com/Amit-proj/dotfiles-nvim-config-nvim/badges/plugins?style=flat" /></a>
-<a href="https://dotfyle.com/Amit-proj/dotfiles-nvim-config-nvim"><img src="https://dotfyle.com/Amit-proj/dotfiles-nvim-config-nvim/badges/leaderkey?style=flat" /></a>
-<a href="https://dotfyle.com/Amit-proj/dotfiles-nvim-config-nvim"><img src="https://dotfyle.com/Amit-proj/dotfiles-nvim-config-nvim/badges/plugin-manager?style=flat" /></a>
+<a href="https://dotfyle.com/amitsalman890/dotfiles-nvim-config-nvim"><img src="https://dotfyle.com/amitsalman890/dotfiles-nvim-config-nvim/badges/plugins?style=flat" /></a>
+<a href="https://dotfyle.com/amitsalman890/dotfiles-nvim-config-nvim"><img src="https://dotfyle.com/amitsalman890/dotfiles-nvim-config-nvim/badges/leaderkey?style=flat" /></a>
+<a href="https://dotfyle.com/amitsalman890/dotfiles-nvim-config-nvim"><img src="https://dotfyle.com/amitsalman890/dotfiles-nvim-config-nvim/badges/plugin-manager?style=flat" /></a>
 
 ## Usage (just NVIM)
 
@@ -11,13 +11,13 @@
 Clone the repository and install the plugins:
 
 ```sh
-git clone git@github.com:Amit-proj/dotfiles ~/.config/Amit-proj/dotfiles
+git clone git@github.com:amitsalman890/dotfiles ~/.config/amitsalman890/dotfiles
 ```
 
 Open Neovim with this config:
 
 ```sh
-NVIM_APPNAME=Amit-proj/dotfiles/nvim/.config/nvim nvim
+NVIM_APPNAME=amitsalman890/dotfiles/nvim/.config/nvim nvim
 ```
 
 ## Usage
@@ -43,7 +43,7 @@ NVIM_APPNAME=Amit-proj/dotfiles/nvim/.config/nvim nvim
 
    ```bash
    [[ -d ~/Repos ]] || mkdir ~/Repos
-   cd ~ && git clone git@github.com:Amit-proj/dotfiles.git .dotfiles && cd .dotfiles
+   cd ~ && git clone git@github.com:amitsalman890/dotfiles.git .dotfiles && cd .dotfiles
    ```
 
 3. Install brew dependencies (generated with `brew bundle dump`)
