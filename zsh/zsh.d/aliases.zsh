@@ -66,6 +66,7 @@ alias -g Wt='while :;do '
 alias -g Wr=' | while read -r line;do echo "=== $line ==="; '
 alias -g D=';done'
 alias ssv='ssv.sh awsjump'
+alias ssc='ssc.sh'
 
 # Text Processing
 alias -g H='| head'
